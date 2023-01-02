@@ -1,0 +1,10 @@
+django-env
+*.pyc
+__pycache__/
+.vscode
+node_modules
+db.sqlite3
+db.sqlite3-journal
+docker/
+relatable/db.sqlite3
+./relatable/db.sqlite3
