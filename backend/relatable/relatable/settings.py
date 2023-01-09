@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'user.apps.UserConfig',
     'rest_framework',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken'  #DRF Authentication 사용
 ]
 
 RESTFRAMEWORK = {
@@ -47,11 +47,13 @@ RESTFRAMEWORK = {
         'rest_framework.permissions.AllowAny'
     ],
 	'DEFAULT_AUTHENTICATION_CLASSES': [
-    	'rest_framework.authentication.SessionAuthenticaiotn',
-        'rest_framework.authentication.BasicAuthenticaiotn',
+    	'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ],
 }
+
+AUTH_USER_MODEL = "user.User"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

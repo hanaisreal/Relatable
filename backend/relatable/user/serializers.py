@@ -15,9 +15,11 @@ class UserInfoSerializer(serializers.ModelSerializer):
         )
 
 
-class UserNameSerializer(serializers.ModelSerializer):
+class UserBasicInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
             "username",
+            "nickname",
+            "intro"
         )
