@@ -3,7 +3,7 @@ from .models import User
 from rest_framework_jwt.settings import api_settings
 from rest_framework import serializers
 
-class UserInfoSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
@@ -15,6 +15,18 @@ class UserInfoSerializer(serializers.ModelSerializer):
             "profile_img",
             "logged_in",
         )
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+        
+    def create(self, validated_data):  #비밀번호 암호화
+        password = validated_data.pop('password', None)
+        instance = self.Meta.model(**validated_data)
+        if password is not None:
+            instance.set_password(password)
+        instance.save()
+        return instance
+    
 
 
 #계정 생성 직후에 사용자에게 토큰을 반환하기 위해 수동으로 토큰을 생성하는 메소드
