@@ -1,73 +1,73 @@
-from django.http import HttpResponse
-from django.shortcuts import render
-from .models import User
-from rest_framework.authtoken.models import Token
+from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import permissions, authentication
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from django.contrib.auth import authenticate, login, logout
-from .serializers import UserInfoSerializer, UserNameSerializer
-# Create your views here.
+from rest_framework.exceptions import AuthenticationFailed
+from .serializers import UserSerializer
+from .models import User
+import jwt, datetime
 
-@api_view(['GET'])  #Takes a list of HTTP methods that views should respond to 
-def token(request):
-    if request.method == 'GET':
-        return HTTPResponse(status = 204)
+class RegisterView(APIView):
+    def post(self, request):
+        serializer = UserSerializer(data = request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
-@api_view(['POST'])        
-def signup(request):
-    if request.method == 'POST':
+class LoginView(APIView):
+    def post(self, request):
+        username = request.data['username']
+        password = request.data['password']
+
+        user = User.objects.filter(username=username).first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+        
+        if not user.check_password(password):
+            raise AuthenticationFailed("Incorrect password!")
+        
+        #to create jwt, need payload
+        payload = {
+            'id': user.id,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60),  #expiration duration
+            'iat': datetime.datetime.utcnow() #time jwt is created
+        }
+
+        token = jwt.encode(payload, 'secret', algorithm='HS256').decode('utf-8')  # this makes jwt token like xxxx.yyyy.zzzz
+
+        #send token in cookies
+        response = Response()
+        response.set_cookie(key='jwt', value=token, httponly=True) #don't want token to be accessed by frontend
+        response.data = {
+                'jwt': token  #it is not returning user because Object of type User is not JSON serializable
+            }
+        #user matches
+        return response
+
+
+class UserView(APIView):
+    
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed('Unauthenticated!')
 
         try:
-            request_data = request.data.copy()
-            username = request_data['username']
-            password = request_data['password']
+            payload = jwt.decode(token, 'secret', algorithm=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Unauthenticated!')
+        
+        user = User.objects.filter(id = payload['id']).first()
+        serializer = UserSerializer(user)
 
-            user = User.objects.create_user(
-                username=username, password=password
-            )
-            Token.objests.create(user = user)  #toen key should be included in the authorization http header
+        return Response(serializer.data)
 
-            return HttpResponse(status = 201)
-            
-        except Exception as e:
-            print(e)
-            return HttpResponse(status = 400)
+class LogoutView(APIView):
+    def post(self, request):
+        #remove cookie
+        response = Response()
+        response.delete_cookie('jwt')
+        response.data = {
+            'message': 'success'
+        }
 
-@api_view(['POST'])
-def signin(request):
-    if request.method == 'POST':
-        request_data = request.data.copy()
-        username = request_data['username']
-        password = request_data['password']
-
-        user = authenticate(username = username, password = password)
-
-        if user is not None: # a backend authenticated the credentials
-            
-            login(request, user)  # login() is given in django, redirect to a success page
-            token = Token.objects.get(user = user)
-            user.logged_in = True
-            user.save()
-
-            user_data = UserInfoSerializer(user).data
-            data = {'user_data': user_data, 'token': token.key}
-            return Response(data)
-        else:
-            HttpResponse(status = 401)
-
- 
-@api_view(['POST'])
-@authentication_classes([authentication.TokenAuthentication])
-@permission_classes([permissions.IsAuthenticated])
-def signout(request):
-    if request.method == 'POST':
-        user = request.user
-        if user.is_authenticated:
-            user.logged_in = False
-            user.save()
-            logout(request)
-            return HttpResponse(status=200)
-
-
-           
+        return response

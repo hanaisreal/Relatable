@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,8 +28,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+CORS_ORIGIN_WHITELIST = ['http://localhost:3000'] #아까 설치한 corsheaders로 해당 서버와 연결할 서버의 url을 작성해준모습
+
 
 # Application definition
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -38,22 +42,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'user.apps.UserConfig',
-    'rest_framework',
-    'rest_framework.authtoken'
+    'rest_framework', # 추가
+    'rest_framework_jwt', # 추가
+    'corsheaders', # 추가
 ]
 
-RESTFRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [ 
-        'rest_framework.permissions.AllowAny'
-    ],
-	'DEFAULT_AUTHENTICATION_CLASSES': [
-    	'rest_framework.authentication.SessionAuthenticaiotn',
-        'rest_framework.authentication.BasicAuthenticaiotn',
-        'rest_framework.authentication.TokenAuthentication',
-    ],
-}
+AUTH_USER_MODEL = "user.User"
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',     # 추가
+    'django.middleware.common.CommonMiddleware', # 추가
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -131,7 +129,13 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media') #사용자가 업로드한 파일 관리
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CORS_ORIGIN_ALLOW_ALL = True  #추가, to allow frontend port to access backend apps
+CORS_ALLOW_CREDENTIALS = True  #추가, to allow frontend to access cookies 

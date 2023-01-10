@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from .models import User
+from rest_framework import serializers
 
-class UserInfoSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
@@ -13,11 +14,15 @@ class UserInfoSerializer(serializers.ModelSerializer):
             "profile_img",
             "logged_in",
         )
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
 
-
-class UserNameSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = (
-            "username",
-        )
+    def create(self, validated_data):  #비밀번호 암호화
+        password = validated_data.pop('password', None)
+        instance = self.Meta.model(**validated_data)
+        if password is not None:
+            instance.set_password(password)
+        instance.save()
+        return instance
+    
