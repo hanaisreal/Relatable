@@ -33,17 +33,33 @@ CORS_ORIGIN_WHITELIST = ['http://localhost:3000'] #아까 설치한 corsheaders�
 
 # Application definition
 
+REST_FRAMEWORK = {
+   'DEFAULT_AUTHENTICATION_CLASSES': (
+       'rest_framework.authentication.TokenAuthentication',
+       'rest_framework.authentication.BasicAuthentication',
+       'rest_framework.authentication.SessionAuthentication',
+       'rest_framework_simplejwt.authentication.JWTAuthentication',
+   ),
+   'DEFAULT_PERMISSION_CLASSES': (
+        #'rest_framework.permissions.IsAuthenticated',
+        #'rest_framework.permissions.AllowAny'
+   ),
+}
 
 INSTALLED_APPS = [
+    'user.apps.UserConfig',
+    'bookmark.apps.BookmarkConfig',
+    'comment.apps.CommentConfig',
+    'post.apps.PostConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'user.apps.UserConfig',
     'rest_framework', # 추가
     'rest_framework_jwt', # 추가
+    'rest_framework.authtoken', #추가
     'corsheaders', # 추가
 ]
 
