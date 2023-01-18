@@ -38,24 +38,36 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'user.apps.UserConfig',
-    'rest_framework',
-    'rest_framework.authtoken'  #DRF Authentication 사용
+    'bookmark.apps.BookmarkConfig',
+    'comment.apps.CommentConfig',
+    'like.apps.LikeConfig',
+    'post.apps.PostConfig',
+    'rest_framework',   #added
+    'rest_framework.authtoken',  #DRF Authentication 사용
+    'corsheaders'  #added
 ]
 
-RESTFRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [ 
-        'rest_framework.permissions.AllowAny'
-    ],
-	'DEFAULT_AUTHENTICATION_CLASSES': [
-    	'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
-    ],
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
+#         'rest_framework.authentication.SessionAuthentication',
+#         'rest_framework.authentication.BasicAuthentication',
+#         'rest_framework_simplejwt.authentication.JWTAuthentication', 
+#     ),
+#     'DEFAULT_PERMISSION_CLASSES': (
+#          #'rest_framework.permissions.IsAuthenticated',
+#    ),
+#     'EXCEPTION_HANDLER': 'user.exceptions.status_code_handler',
+# }
+
+
+REST_FRAMEWORK = {
+    
+    'EXCEPTION_HANDLER': 'user.exceptions.status_code_handler'
 }
 
-AUTH_USER_MODEL = "user.User"
-
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -137,3 +149,9 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+AUTH_USER_MODEL = "user.User"  #added: connect to user
+
+CORS_ORIGIN_ALLOW_ALL = True  #added
+CORS_ALLOW_CREDENTIALS = True #added

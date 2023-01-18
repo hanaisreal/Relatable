@@ -5,7 +5,12 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     #기본적인 AbstractUser를 상속받기 때문에 id, username, password는 이미 있다. 
-    nickname = models.CharField(max_length= 50, unique=True)
-    intro = models.CharField(max_length= 500)
-    profile_img = models.CharField(max_length= 1000, null=True)
-    logged_in = models.BooleanField(default=False)
+    username = models.CharField(max_length=255, unique=True)
+    #email = models.CharField(max_length=255)
+    password = models.CharField(max_length=255)
+
+    first_name = None
+    last_name = None
+
+    USERNAME_FIELD = 'username'   #login using username
+    REQUIRED_FIELDS = []
